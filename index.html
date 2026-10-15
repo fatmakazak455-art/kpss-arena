@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KPSS Arena</title>
+<meta name="theme-color" content="#e3f2fb">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏆%3C/text%3E%3C/svg%3E">
+<style>
+:root{--bg:#e3f2fb;--card:#f8fcff;--tx:#12324a;--mu:#4f7189;--ac:#1e88c7;--ok:#1f9d55;--no:#d64545;--bd:#b7d9ec;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e2635;--card:#153548;--tx:#e6f4fc;--mu:#8fb6cc;--ac:#5cc0f0;--ok:#3ec27a;--no:#ef6b6b;--bd:#2a5570}}
+:root[data-theme="dark"]{--bg:#0e2635;--card:#153548;--tx:#e6f4fc;--mu:#8fb6cc;--ac:#5cc0f0;--ok:#3ec27a;--no:#ef6b6b;--bd:#2a5570}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+main{max-width:560px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;margin-top:12px}
+.top{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.top span{padding:4px 10px;border-radius:20px;border:1px solid transparent}
+.top .on{border-color:var(--ac);color:var(--ac)}
+.tag{display:inline-block;font-size:12px;color:var(--mu);border:1px solid var(--bd);border-radius:20px;padding:2px 10px;margin:0 6px 10px 0}
+h1{font-size:22px;margin:8px 0}
+.bk{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:8px 12px;min-height:40px;font-weight:600}
+.st{display:flex;gap:8px;margin-top:12px}
+.st div{flex:1;text-align:center;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px 4px;font-size:14px}
+.st b{display:block;font-size:22px;color:var(--ac)}
+.pg{display:flex;gap:6px;overflow-x:auto;padding:10px 2px;position:relative;-webkit-overflow-scrolling:touch}
+.pc{flex:0 0 38px;height:38px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:0;font-weight:600}
+.pc.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.pc.no{background:var(--no);border-color:var(--no);color:#fff}
+.pc.cur{outline:2px solid var(--ac);outline-offset:1px}
+.pc:disabled{opacity:.4}
+button,select{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.opt{min-height:50px;font-size:17px}
+body{-webkit-text-size-adjust:100%}
+@media(max-width:480px){main{padding:10px}.card{padding:14px}h1{font-size:20px}.top{font-size:14px}}
+select{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);margin-top:6px}
+button{font:inherit;cursor:pointer}
+.opt{display:block;width:100%;text-align:left;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-top:8px}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--card))}
+.opt.no{border-color:var(--no);background:color-mix(in srgb,var(--no) 18%,var(--card))}
+.main{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:12px 18px;margin-top:12px;width:100%;font-weight:600}
+.exp{margin-top:12px;color:var(--mu);font-size:15px}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+td,th{text-align:left;padding:6px 4px;border-bottom:1px solid var(--bd);font-size:15px}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+// [ders, zorluk(1-3), soru, DOĞRU şık, yanlış1, yanlış2, yanlış3, açıklama]  (şıklar oyunda karıştırılır)
+const Q=[
+["Tarih",1,"İstanbul'u fetheden Osmanlı padişahı kimdir?","II. Mehmed","Yavuz Sultan Selim","Kanuni Sultan Süleyman","I. Murad","İstanbul 1453'te II. Mehmed (Fatih) tarafından fethedildi."],
+["Tarih",1,"Türk adını devlet adı olarak ilk kullanan Türk devleti hangisidir?","Göktürkler","Asya Hunları","Uygurlar","Karahanlılar","Göktürkler (Kök Türkler) bu adı taşıyan ilk devlettir."],
+["Tarih",2,"I. Dünya Savaşı'nda Osmanlı Devleti hangi ateşkesi imzalamıştır?","Mondros","Mudanya","Sevr","Lozan","30 Ekim 1918'de imzalandı."],
+["Tarih",2,"Tanzimat Fermanı hangi padişah döneminde ilan edilmiştir?","Abdülmecid","II. Mahmud","III. Selim","Abdülaziz","1839'da Abdülmecid zamanında ilan edildi."],
+["Tarih",2,"Büyük Selçuklu Devleti'nin kuruluşunu sağlayan savaş hangisidir?","Dandanakan","Miryokefalon","Kösedağ","Katvan","1040'ta Gazneliler yenildi."],
+["Tarih",2,"Büyük Taarruz'dan sonra imzalanan, Doğu Trakya'nın TBMM'ye bırakılmasını sağlayan ateşkes hangisidir?","Mudanya","Mondros","Lozan","Sevr","11 Ekim 1922'de imzalandı."],
+["Tarih",2,"Yeniçeri Ocağı hangi padişah döneminde kaldırılmıştır?","II. Mahmud","III. Selim","II. Abdülhamid","Abdülmecid","1826'daki Vaka-i Hayriye ile kaldırıldı."],
+["Tarih",2,"İslamiyet'i kabul eden ilk Türk devleti hangisidir?","Karahanlılar","Büyük Selçuklular","Gazneliler","Uygurlar","Satuk Buğra Han döneminde kabul edildi."],
+["Tarih",2,"Anadolu Selçuklu Devleti'nin zayıflamasına yol açan 1243 savaşı hangisidir?","Kösedağ","Miryokefalon","Malazgirt","Dandanakan","Moğollara yenilindi."],
+["Tarih",2,"Osmanlı'da Türkçe basım yapan ilk matbaa kimin öncülüğünde kuruldu?","İbrahim Müteferrika","Kâtip Çelebi","Piri Reis","Mimar Sinan","1727'de III. Ahmed döneminde."],
+["Tarih",3,"Osmanlı'nın ilk kez büyük toprak kaybettiği antlaşma hangisidir?","Karlofça","Zitvatorok","Pasarofça","Yaş","1699; gerileme dönemi başlangıcıdır."],
+["Tarih",3,"Kırım'ın bağımsızlığını sağlayan antlaşma hangisidir?","Küçük Kaynarca","Karlofça","Yaş","Paris","1774; Rusya'ya Ortodoksları koruma hakkı da verildi."],
+["Tarih",3,"\"Hatt-ı müdafaa yoktur, sath-ı müdafaa vardır.\" sözü hangi savaşla ilgilidir?","Sakarya Meydan Muharebesi","I. İnönü Savaşı","Dumlupınar","Gelibolu","1921'de söylendi; sonrasında Mustafa Kemal'e Gazi unvanı verildi."],
+["Tarih",3,"Misak-ı Millî'yi kabul eden meclis hangisidir?","Son Osmanlı Mebusan Meclisi","TBMM","Erzurum Kongresi","Sivas Kongresi","28 Ocak 1920'de kabul edildi."],
+["Coğrafya",1,"Türkiye'nin yüzölçümü en büyük ili hangisidir?","Konya","Ankara","Sivas","Erzurum","Konya yaklaşık 40 bin km²'dir."],
+["Coğrafya",1,"Türkiye sınırları içinde tamamı akan en uzun akarsu hangisidir?","Kızılırmak","Sakarya","Fırat","Gediz","Fırat'ın bir kısmı yurt dışındadır."],
+["Coğrafya",1,"Türkiye'nin en yüksek dağı hangisidir?","Ağrı Dağı","Erciyes","Kaçkar","Uludağ","Yaklaşık 5137 m."],
+["Coğrafya",1,"Çay tarımı Türkiye'de en çok hangi bölgede yapılır?","Karadeniz","Ege","Marmara","İç Anadolu","Bol yağışlı Doğu Karadeniz kıyılarında."],
+["Coğrafya",2,"Türkiye hangi enlemler arasında yer alır?","36°–42° Kuzey","30°–36° Kuzey","42°–48° Kuzey","26°–45° Kuzey","26°–45° doğu boylamları arasındadır."],
+["Coğrafya",2,"Yağış miktarı en fazla olan bölge hangisidir?","Karadeniz","Akdeniz","İç Anadolu","Güneydoğu Anadolu","Karadeniz'de yağış her mevsim görülür."],
+["Coğrafya",2,"Türkiye'nin en büyük tatlı su gölü hangisidir?","Beyşehir Gölü","Van Gölü","Tuz Gölü","İznik Gölü","Van sodalı, Tuz tuzlu bir göldür."],
+["Coğrafya",3,"Aşağıdakilerden hangisi bir krater gölüdür?","Nemrut Gölü","Eğirdir Gölü","Burdur Gölü","Tuz Gölü","Sönmüş volkanın kraterinde oluşmuştur."],
+["Coğrafya",3,"Kıyı uzunluğu en fazla olan coğrafi bölge hangisidir?","Ege","Akdeniz","Karadeniz","Marmara","Girintili çıkıntılı kıyılar nedeniyle."],
+["Vatandaşlık",1,"Anayasa'ya göre yasama yetkisi kime aittir?","TBMM","Cumhurbaşkanı","Anayasa Mahkemesi","Yargıtay","Bu yetki devredilemez."],
+["Vatandaşlık",1,"TBMM'nin üye sayısı kaçtır?","600","550","450","650","2017 değişikliğiyle 550'den 600'e çıkarıldı."],
+["Vatandaşlık",1,"\"Devletin şekli Cumhuriyettir\" hükmü Anayasa'nın kaçıncı maddesindedir?","1","2","3","4","1. madde değiştirilemez."],
+["Vatandaşlık",2,"Cumhurbaşkanı seçilebilmek için en az kaç yaşını doldurmuş olmak gerekir?","40","35","30","45","Ayrıca yükseköğrenim görmüş olmak şarttır."],
+["Vatandaşlık",2,"Milletvekili seçilme yaşı kaçtır?","18","21","25","30","2017'de 25'ten 18'e düşürüldü."],
+["Vatandaşlık",2,"Cumhurbaşkanı kaç yıllığına seçilir?","5 yıl","4 yıl","6 yıl","7 yıl","En fazla iki kez seçilebilir."],
+["Vatandaşlık",2,"Anayasa Mahkemesi kaç üyeden oluşur?","15","11","17","9","2017'den sonra 15 üyedir."],
+["Vatandaşlık",3,"Anayasa'nın hangi maddeleri değiştirilemez ve değiştirilmesi teklif edilemez?","1., 2. ve 3. maddeler","1. ve 2. maddeler","2., 3. ve 4. maddeler","1., 3. ve 5. maddeler","Bu hüküm 4. maddededir."],
+["Vatandaşlık",3,"Anayasa değişikliğinin TBMM'de kabulü için kaç oy gerekir?","360","300","400","276","Teklif en az 200 imzayla verilir; kabul için beşte üç (360) oy gerekir."],
+["Türkçe",1,"Hangisinin yazımı yanlıştır?","yanlız","yalnız","herkes","birkaç","Doğrusu \"yalnız\" biçimindedir."],
+["Türkçe",1,"\"Kırmızı elma yere düştü.\" cümlesinde sıfat hangisidir?","kırmızı","elma","yere","düştü","Kırmızı, \"elma\" adını niteler."],
+["Türkçe",2,"Hangisi doğru yazılmıştır?","hiçbir şey","hiç bir şey","hiçbirşey","hiç birşey","\"Hiçbir\" bitişik, \"şey\" ayrı yazılır."],
+["Türkçe",2,"Hangisi türemiş bir sözcüktür?","gözlük","kalem","masa","deniz","Gözlük = göz + -lük."],
+["Türkçe",3,"Hangi sözcük büyük ünlü uyumuna uyar?","okul","kitap","kalem","televizyon","Okul: o–u, ikisi de kalın ünlü."],
+["Türkçe",3,"\"Gelince haber ver.\" cümlesindeki \"gelince\" hangi fiilimsidir?","Zarf-fiil","İsim-fiil","Sıfat-fiil","Çekimli fiil","-ince eki zarf-fiil ekidir."],
+["Tarih",1,"Osmanlı Devleti'nin kurucusu kimdir?","Osman Bey","Orhan Bey","Ertuğrul Gazi","I. Murad","Osman Bey, 1299'da beyliği bağımsız bir devlete dönüştürdü."],
+["Tarih",1,"Zafer Bayramı olarak kutlanan 30 Ağustos hangi savaşın zaferiyle ilgilidir?","Başkomutanlık Meydan Muharebesi","Sakarya Meydan Muharebesi","Çanakkale Savaşı","Malazgirt Savaşı","30 Ağustos 1922'de Yunan ordusu kesin olarak yenildi."],
+["Tarih",1,"Aşağıdakilerden hangisi Atatürk ilkelerinden biri değildir?","Federalizm","Laiklik","Devletçilik","Halkçılık","İlkeler: cumhuriyetçilik, milliyetçilik, halkçılık, devletçilik, laiklik, inkılapçılık."],
+["Tarih",1,"Mustafa Kemal Atatürk hangi şehirde doğmuştur?","Selanik","Manastır","İstanbul","Edirne","Mustafa Kemal 1881'de Selanik'te doğdu."],
+["Tarih",2,"Kosova Savaşı'nda (1389) şehit düşen Osmanlı padişahı kimdir?","I. Murad","Yıldırım Bayezid","II. Murad","Fatih Sultan Mehmed","I. Murad savaş meydanında şehit oldu."],
+["Tarih",2,"Fetret Devri hangi savaşın ardından başlamıştır?","Ankara Savaşı","Kosova Savaşı","Niğbolu Savaşı","Varna Savaşı","1402'de Timur, Yıldırım Bayezid'i yendi."],
+["Tarih",2,"Mohaç Meydan Muharebesi hangi padişah döneminde yapılmıştır?","Kanuni Sultan Süleyman","Yavuz Sultan Selim","II. Selim","Fatih Sultan Mehmed","1526'da Macar ordusu yenildi."],
+["Tarih",2,"Osmanlı'ya Akdeniz hâkimiyetini kazandıran 1538 deniz savaşı hangisidir?","Preveze","İnebahtı","Navarin","Çanakkale","Barbaros Hayreddin Paşa komutasında kazanıldı."],
+["Tarih",2,"Yavuz Sultan Selim, Safevileri hangi savaşta yenmiştir?","Çaldıran","Mercidabık","Ridaniye","Mohaç","Çaldıran Savaşı 1514'te yapıldı."],
+["Tarih",2,"Eğitim-öğretimin tek çatı altında toplandığı kanun hangisidir?","Tevhid-i Tedrisat","Medeni Kanun","Şapka Kanunu","Soyadı Kanunu","3 Mart 1924'te kabul edildi."],
+["Tarih",2,"Boğazlar üzerinde Türkiye'nin egemenliğini sağlayan antlaşma hangisidir?","Montrö","Lozan","Sevr","Mudanya","1936'da imzalandı."],
+["Tarih",2,"Orhun Yazıtları hangi Türk devletine aittir?","Göktürkler","Uygurlar","Asya Hunları","Karahanlılar","Bilinen en eski Türkçe yazılı belgelerdir."],
+["Tarih",2,"Ordu-millet anlayışını ve onlu sistemi kuran Hun hükümdarı kimdir?","Mete Han","Bumin Kağan","Bilge Kağan","Attila","Asya Hun Devleti'nin kurucusudur."],
+["Tarih",2,"Kavimler Göçü'nü başlatan olay hangisidir?","Hunların batıya ilerlemesi","Malazgirt Savaşı","Haçlı Seferleri","Moğol istilası","375'te Hunların Avrupa'ya ilerlemesiyle başladı."],
+["Tarih",3,"Osmanlıların Rumeli'ye geçişini başlatan kale hangisidir?","Çimpe","Edirne","Niş","Selanik","Süleyman Paşa 1352'de Çimpe'yi aldı."],
+["Tarih",3,"Lale Devri hangi antlaşmadan sonra başlamıştır?","Pasarofça","Karlofça","Prut","Belgrad","1718'de imzalandı; III. Ahmed dönemidir."],
+["Tarih",3,"Padişahın yetkilerinin ilk kez sınırlandığı belge hangisidir?","Sened-i İttifak","Tanzimat Fermanı","Islahat Fermanı","Kanun-i Esasi","1808'de II. Mahmud döneminde imzalandı."],
+["Coğrafya",1,"Türkiye'nin en kalabalık ili hangisidir?","İstanbul","Ankara","İzmir","Bursa","İstanbul Marmara Bölgesi'ndedir."],
+["Coğrafya",1,"Zeytin yetiştiriciliği en yaygın hangi bölgemizde yapılır?","Ege","Karadeniz","Doğu Anadolu","İç Anadolu","Ege'nin Akdeniz iklimi zeytine uygundur."],
+["Coğrafya",2,"Nüfus yoğunluğu en fazla olan bölgemiz hangisidir?","Marmara","Ege","İç Anadolu","Doğu Anadolu","Sanayi ve şehirleşme Marmara'da yoğundur."],
+["Coğrafya",3,"Aşağıdakilerden hangisi karstik arazi şeklidir?","Dolin","Delta","Falez","Moren","Dolin, kireçtaşının erimesiyle oluşan çukurluktur."],
+["Coğrafya",1,"Haritada işaretli göl hangisidir?","Van Gölü","Tuz Gölü","Beyşehir Gölü","Eğirdir Gölü","Van Gölü Doğu Anadolu'dadır.",[42.9,38.6]],
+["Coğrafya",1,"Haritada işaretli dağ hangisidir?","Ağrı Dağı","Erciyes","Uludağ","Kaçkar","Ağrı Dağı Türkiye'nin en yüksek dağıdır.",[44.3,39.7]],
+["Coğrafya",2,"Haritada işaretli göl hangisidir?","Tuz Gölü","Van Gölü","Beyşehir Gölü","Burdur Gölü","Tuz Gölü İç Anadolu'dadır.",[33.4,38.75]],
+["Coğrafya",3,"Haritada işaretli dağ hangisidir?","Erciyes","Uludağ","Kaçkar","Palandöken","Erciyes Kayseri yakınındaki sönmüş volkandır.",[35.45,38.53]],
+["Coğrafya",3,"Haritada işaretli göl hangisidir?","Beyşehir Gölü","Eğirdir Gölü","Burdur Gölü","Tuz Gölü","Beyşehir en büyük tatlı su gölümüzdür.",[31.5,37.75]],
+["Tarih",1,"Bilinen ilk Türk devleti hangisidir?","Asya Hun Devleti","Göktürkler","Uygurlar","Karahanlılar","Asya Hun Devleti, Mete Han döneminde güçlendi."],
+["Tarih",1,"Osmanlı Devleti'nin ilk başkenti neresidir?","Bursa","Edirne","İstanbul","Konya"],
+["Tarih",1,"İstanbul'un fethi ile hangi çağ kapanıp hangisi başlamıştır?","Orta Çağ kapandı, Yeni Çağ başladı","İlk Çağ kapandı, Orta Çağ başladı","Yeni Çağ kapandı, Yakın Çağ başladı","Yakın Çağ kapandı, Yeni Çağ başladı","Fetih 1453'tedir."],
+["Tarih",1,"Osmanlı Devleti I. Dünya Savaşı'na hangi devletin yanında girmiştir?","Almanya","İngiltere","Fransa","Rusya"],
+["Tarih",2,"Divanü Lügati't-Türk'ün yazarı kimdir?","Kaşgarlı Mahmud","Yusuf Has Hacib","Ahmet Yesevi","Yunus Emre"],
+["Tarih",2,"Kutadgu Bilig'in yazarı kimdir?","Yusuf Has Hacib","Kaşgarlı Mahmud","Edip Ahmed Yüknekî","Ahmet Yesevi","Karahanlı dönemi eseridir."],
+["Tarih",2,"Türklerin İslamiyet ile tanışmasında etkili olan 751 savaşı hangisidir?","Talas","Dandanakan","Malazgirt","Pasinler"],
+["Tarih",2,"Anadolu Selçuklu Devleti'nin kurucusu kimdir?","Kutalmışoğlu Süleyman Şah","Alparslan","Melikşah","Tuğrul Bey"],
+["Tarih",2,"Nizamiye Medreselerini kuran vezir kimdir?","Nizamülmülk","Tuğrul Bey","Alparslan","Sencer"],
+["Tarih",2,"Anadolu Selçuklu Devleti'nin en uzun süre başkenti hangi şehirdir?","Konya","İznik","Kayseri","Sivas"],
+["Tarih",2,"Osmanlı başkenti Edirne'ye hangi padişah döneminde taşınmıştır?","I. Murad","Orhan Bey","Yıldırım Bayezid","Çelebi Mehmed"],
+["Tarih",2,"Yıldırım Bayezid'in Haçlı ordusunu yendiği 1396 savaşı hangisidir?","Niğbolu","Kosova","Varna","Mohaç"],
+["Tarih",2,"II. Murad'ın Haçlı ordusunu yendiği 1444 savaşı hangisidir?","Varna","Niğbolu","Kosova","Mohaç"],
+["Tarih",2,"Halifelik Osmanlılara hangi padişah döneminde geçmiştir?","Yavuz Sultan Selim","Kanuni Sultan Süleyman","Fatih Sultan Mehmed","II. Bayezid","1517 Mısır Seferi sonrası."],
+["Tarih",2,"Osmanlı donanmasının yandığı 1571 savaşı hangisidir?","İnebahtı","Preveze","Cerbe","Navarin"],
+["Tarih",2,"1683'te Viyana'yı kuşatan Osmanlı sadrazamı kimdir?","Kara Mustafa Paşa","Köprülü Mehmed Paşa","Sokullu Mehmed Paşa","Damat İbrahim Paşa"],
+["Tarih",2,"Nizam-ı Cedid ordusunu kuran padişah kimdir?","III. Selim","II. Mahmud","Abdülmecid","II. Abdülhamid"],
+["Tarih",2,"Gayrimüslimlere eşitlik tanıyan 1856 fermanı hangisidir?","Islahat Fermanı","Tanzimat Fermanı","Sened-i İttifak","Kanun-i Esasi"],
+["Tarih",2,"Kanun-i Esasi'nin hazırlanmasında öncülük eden devlet adamı kimdir?","Mithat Paşa","Mustafa Reşit Paşa","Âli Paşa","Fuat Paşa"],
+["Tarih",2,"Trablusgarp Savaşı (1911) hangi devletle yapılmıştır?","İtalya","Fransa","İngiltere","Rusya"],
+["Tarih",2,"Sarıkamış Harekâtı hangi cephede yapılmıştır?","Kafkas Cephesi","Çanakkale Cephesi","Irak Cephesi","Suriye Cephesi"],
+["Tarih",2,"Millî mücadelenin gerekçe ve amacının ilk kez belirtildiği belge hangisidir?","Amasya Genelgesi","Misak-ı Millî","Erzurum Kongresi Bildirisi","Havza Genelgesi","1919'da yayımlandı."],
+["Tarih",2,"Anadolu ve Rumeli Müdafaa-i Hukuk Cemiyetleri hangi kongrede birleştirilmiştir?","Sivas Kongresi","Erzurum Kongresi","Balıkesir Kongresi","Alaşehir Kongresi"],
+["Tarih",2,"Düzenli ordunun kazandığı ilk zafer hangisidir?","I. İnönü Savaşı","Sakarya Savaşı","Dumlupınar","II. İnönü Savaşı"],
+["Tarih",3,"Maniheizm'i kabul eden Türk devleti hangisidir?","Uygurlar","Göktürkler","Asya Hunları","Karahanlılar","Bögü Kağan döneminde kabul edildi."],
+["Tarih",3,"Yazıtını kendisi diktiren Göktürk devlet adamı kimdir?","Tonyukuk","Bilge Kağan","Kül Tigin","Bumin Kağan"],
+["Tarih",3,"Büyük Selçuklu Devleti'nin yıkılışını hızlandıran 1141 savaşı hangisidir?","Katvan","Dandanakan","Kösedağ","Miryokefalon"],
+["Tarih",3,"Anadolu'nun Türk yurdu olduğunun kesinleştiği savaş hangisidir?","Miryokefalon","Malazgirt","Kösedağ","Dandanakan","1176'da Kılıçarslan Bizans'ı yendi."],
+["Tarih",3,"Kardeş katline kanuni dayanak sağlayan padişah kimdir?","Fatih Sultan Mehmed","Yavuz Sultan Selim","Kanuni Sultan Süleyman","Orhan Bey"],
+["Tarih",3,"Osmanlı'nın Avusturya imparatorunu eşit kabul ettiği 1606 antlaşması hangisidir?","Zitvatorok","Karlofça","Pasarofça","Belgrad"],
+["Tarih",3,"93 Harbi'ni sona erdiren ilk antlaşma hangisidir?","Ayastefanos","Berlin","Paris","Yaş"],
+["Tarih",3,"İttihat ve Terakki Cemiyeti'nin kurucusu kimdir?","İbrahim Temo","Enver Paşa","Talat Paşa","Ziya Gökalp"],
+["Tarih",3,"TBMM'nin ilk anayasası hangisidir?","1921 Teşkilat-ı Esasiye","Kanun-i Esasi","1924 Anayasası","1961 Anayasası"],
+["Tarih",3,"TBMM'nin imzaladığı ilk antlaşma hangisidir?","Gümrü","Moskova","Kars","Ankara İtilafnamesi"],
+["Tarih",3,"Güney Cephesi hangi antlaşmayla kapanmıştır?","Ankara İtilafnamesi","Gümrü","Moskova","Kars"],
+["Tarih",3,"Cumhuriyet döneminin ilk muhalefet partisi hangisidir?","Terakkiperver Cumhuriyet Fırkası","Serbest Cumhuriyet Fırkası","Demokrat Parti","Millî Kalkınma Partisi"],
+["Tarih",3,"Takrir-i Sükûn Kanunu hangi isyan sonrası çıkarılmıştır?","Şeyh Sait","Menemen","Dersim","Koçgiri"],
+["Coğrafya",1,"Türkiye kaç coğrafi bölgeye ayrılır?","7","5","6","8"],
+["Coğrafya",1,"Hangisi Türkiye'nin kıyısı olmayan denizdir?","Hazar Denizi","Karadeniz","Ege Denizi","Akdeniz"],
+["Coğrafya",1,"İç Anadolu Bölgesi'nde hangi iklim hüküm sürer?","Karasal iklim","Akdeniz iklimi","Karadeniz iklimi","Muson iklimi"],
+["Coğrafya",1,"Yazları sıcak ve kurak, kışları ılık ve yağışlı olan iklim hangisidir?","Akdeniz iklimi","Karasal iklim","Karadeniz iklimi","Step iklimi"],
+["Coğrafya",2,"Türkiye'nin en büyük adası hangisidir?","Gökçeada","Bozcaada","Marmara Adası","Avşa"],
+["Coğrafya",2,"Karadeniz kıyısına paralel uzanan dağ sırası hangisidir?","Kuzey Anadolu Dağları","Toroslar","Aladağlar","Munzur Dağları"],
+["Coğrafya",2,"Maki hangi iklimin tipik bitki örtüsüdür?","Akdeniz iklimi","Karasal iklim","Karadeniz iklimi","Kutup iklimi"],
+["Coğrafya",2,"Atatürk Barajı hangi akarsu üzerindedir?","Fırat","Dicle","Kızılırmak","Sakarya"],
+["Coğrafya",3,"Yüzölçümü en geniş ova hangisidir?","Konya Ovası","Çukurova","Bafra Ovası","Harran Ovası"],
+["Coğrafya",3,"Çukurova hangi akarsuların biriktirmesiyle oluşmuştur?","Seyhan ve Ceyhan","Kızılırmak ve Yeşilırmak","Gediz ve Menderes","Fırat ve Dicle"],
+["Coğrafya",2,"Haritada işaretli dağ hangisidir?","Uludağ","Erciyes","Kaçkar","Ağrı Dağı","",[29.2,40.07]],
+["Coğrafya",3,"Haritada işaretli dağ hangisidir?","Kaçkar Dağları","Palandöken","Uludağ","Erciyes","",[41.15,40.84]],
+["Coğrafya",3,"Haritada işaretli göl hangisidir?","Eğirdir Gölü","Beyşehir Gölü","Burdur Gölü","Tuz Gölü","",[30.88,37.95]],
+["Vatandaşlık",1,"Anayasa'ya göre egemenlik kayıtsız şartsız kime aittir?","Millete","Cumhurbaşkanı'na","TBMM'ye","Anayasa Mahkemesi'ne"],
+["Vatandaşlık",1,"Türkiye Cumhuriyeti'nin resmî dili hangisidir?","Türkçe","Osmanlıca","İngilizce","Arapça"],
+["Vatandaşlık",1,"İstiklal Marşı'nın şairi kimdir?","Mehmet Akif Ersoy","Namık Kemal","Ziya Gökalp","Tevfik Fikret"],
+["Vatandaşlık",1,"Seçme yaşı kaçtır?","18","16","20","21"],
+["Vatandaşlık",1,"Kanunların Anayasa'ya uygunluğunu denetleyen organ hangisidir?","Anayasa Mahkemesi","Yargıtay","Danıştay","Sayıştay"],
+["Vatandaşlık",1,"TBMM seçimleri kaç yılda bir yapılır?","5","4","6","7"],
+["Vatandaşlık",2,"İdari yargının en yüksek mahkemesi hangisidir?","Danıştay","Yargıtay","Sayıştay","Anayasa Mahkemesi"],
+["Vatandaşlık",2,"Adli yargının en yüksek mahkemesi hangisidir?","Yargıtay","Danıştay","Sayıştay","Anayasa Mahkemesi"],
+["Vatandaşlık",2,"Devletin dilinin Türkçe olduğu Anayasa'nın kaçıncı maddesinde yer alır?","3","1","2","4"],
+["Vatandaşlık",2,"Türkiye'de Cumhurbaşkanlığı hükümet sistemine hangi yıl geçilmiştir?","2018","2014","2017","2019"],
+["Vatandaşlık",3,"Hâkimler ve Savcılar Kurulu kaç üyeden oluşur?","13","11","15","22"],
+["Türkçe",1,"\"kitaplık\" sözcüğü kaç heceden oluşur?","3","2","4","5"],
+["Türkçe",1,"\"Güzel kız geldi.\" cümlesinde yüklem hangisidir?","geldi","kız","güzel","Güzel kız"],
+["Türkçe",2,"Hangisinde ünsüz yumuşaması vardır?","kitabı","kalemi","evi","okulu"],
+["Türkçe",2,"Hangisinde ünsüz benzeşmesi vardır?","sınıfta","evde","okulda","masada"],
+["Türkçe",2,"Hangisi çekimli fiildir?","geldim","gelmek","gelen","gelerek"],
+["Türkçe",2,"Hangisi doğru yazılmıştır?","birçok","bir çok","birşey","hiç bir"],
+["Türkçe",2,"\"Yarın sınava gireceğim.\" cümlesindeki fiil hangi kipte çekimlenmiştir?","Gelecek zaman","Geniş zaman","Şimdiki zaman","Görülen geçmiş zaman"],
+["Türkçe",3,"Hangisi pekiştirmeli sıfattır?","kıpkırmızı","kırmızı","kırmızımsı","kırmızılık"],
+["Türkçe",3,"\"Okuyan öğrenci başarılı oldu.\" cümlesindeki \"okuyan\" hangi fiilimsidir?","Sıfat-fiil","İsim-fiil","Zarf-fiil","Çekimli fiil"],
+["Matematik",1,"2/3 + 1/6 işleminin sonucu kaçtır?","5/6","1/2","3/9","1","4/6 + 1/6 = 5/6."],
+["Matematik",1,"Aşağıdakilerden hangisi asal sayıdır?","29","21","27","33","29 yalnızca 1'e ve kendisine bölünür."],
+["Matematik",1,"Hem asal hem çift olan sayı kaçtır?","2","4","0","1","2 tek çift asal sayıdır."],
+["Matematik",1,"|−7| + |3| işleminin sonucu kaçtır?","10","4","−4","−10","Mutlak değer sayıyı pozitif yapar: 7 + 3."],
+["Matematik",1,"12 ve 18'in EBOB'u kaçtır?","6","3","36","12","Ortak bölenlerin en büyüğü 6'dır."],
+["Matematik",1,"En küçük pozitif tam sayı kaçtır?","1","0","−1","2"],
+["Matematik",2,"12 ve 18'in EKOK'u kaçtır?","36","6","72","216","2²·3² = 36."],
+["Matematik",2,"Aşağıdakilerden hangisi 9'a tam bölünür?","5832","5834","5836","5838","Rakamlar toplamı 18, 9'un katı."],
+["Matematik",2,"(−3)² − 2³ işleminin sonucu kaçtır?","1","−1","17","−17","9 − 8 = 1."],
+["Matematik",2,"5! (5 faktöriyel) kaçtır?","120","25","60","24","5·4·3·2·1 = 120."],
+["Matematik",2,"İki basamaklı en büyük asal sayı kaçtır?","97","99","93","91","99 = 9·11, 93 = 3·31, 91 = 7·13."],
+["Matematik",2,"2³ · 2² işleminin sonucu kaçtır?","32","16","64","10","Üsler toplanır: 2⁵ = 32."],
+["Matematik",2,"Hangisi rasyonel sayıdır?","0,75","π","√2","√5"],
+["Matematik",2,"1'den 10'a kadar olan asal sayıların toplamı kaçtır?","17","18","21","19","2 + 3 + 5 + 7 = 17."],
+["Matematik",3,"36 sayısının pozitif bölenlerinin sayısı kaçtır?","9","6","8","12","36 = 2²·3² → (2+1)(2+1) = 9."],
+["Matematik",3,"EBOB(24, 36) × EKOK(24, 36) kaçtır?","864","72","12","1728","İki sayının çarpımı EBOB·EKOK'a eşittir: 24·36 = 864."],
+["Matematik",3,"1'den 20'ye kadar kaç tane asal sayı vardır?","8","7","9","10","2, 3, 5, 7, 11, 13, 17, 19."],
+["Matematik",3,"Ardışık iki doğal sayının çarpımı 56 ise toplamları kaçtır?","15","13","14","16","7 · 8 = 56, 7 + 8 = 15."],
+["Tarih",2,"Aşağıdakilerden hangileri Büyük Selçuklu Devleti'yle ilgilidir?¶I. Nizamiye Medreseleri¶II. Dandanakan Savaşı¶III. Miryokefalon Savaşı","I ve II","Yalnız I","I ve III","I, II ve III","Miryokefalon (1176) Anadolu Selçuklu dönemindedir."],
+["Tarih",2,"Aşağıdakilerden hangileri Kurtuluş Savaşı'nda yapılan savaşlardandır?¶I. Sakarya Meydan Muharebesi¶II. Çanakkale Savaşı¶III. Büyük Taarruz","I ve III","Yalnız I","II ve III","I, II ve III","Çanakkale Savaşı I. Dünya Savaşı'nda yapıldı."],
+["Tarih",2,"Aşağıdakilerden hangisi hukuk alanındaki inkılaplardandır?¶I. Medeni Kanun'un kabulü¶II. Harf Devrimi¶III. Tevhid-i Tedrisat","Yalnız I","I ve II","II ve III","I, II ve III","Harf Devrimi kültür, Tevhid-i Tedrisat eğitim alanındadır."],
+["Tarih",2,"Aşağıdakilerden hangileri III. Selim döneminde yapılan yeniliklerdendir?¶I. Nizam-ı Cedid ordusunun kurulması¶II. Yeniçeri Ocağı'nın kaldırılması¶III. Avrupa'da daimi elçiliklerin açılması","I ve III","Yalnız I","I ve II","II ve III","Yeniçeri Ocağı II. Mahmud döneminde kaldırıldı."],
+["Tarih",2,"Göktürklerle ilgili aşağıdakilerden hangileri doğrudur?¶I. Türk adını devlet adı olarak kullanmışlardır.¶II. Maniheizm'i resmî din olarak kabul etmişlerdir.¶III. Orhun Yazıtları bu dönemin ürünüdür.","I ve III","Yalnız I","I ve II","II ve III","Maniheizm'i Uygurlar kabul etti."],
+["Tarih",3,"İstanbul'un fethinin sonuçları için aşağıdakilerden hangileri söylenebilir?¶I. Bizans İmparatorluğu yıkılmıştır.¶II. Yeni Çağ başlamıştır.¶III. Halifelik Osmanlılara geçmiştir.","I ve II","Yalnız I","I ve III","I, II ve III","Halifelik 1517'de Yavuz döneminde geçti."],
+["Tarih",2,"Tanzimat Fermanı ile ilgili aşağıdakilerden hangileri doğrudur?¶I. Can, mal ve namus güvenliği sağlanmıştır.¶II. Padişahın yetkileri anayasayla sınırlandırılmıştır.¶III. Vergilerin gelire göre alınması ilkesi benimsenmiştir.","I ve III","Yalnız I","I ve II","II ve III","Anayasa (Kanun-i Esasi) 1876'da ilan edildi."],
+["Tarih",3,"TBMM'nin imzaladığı aşağıdaki antlaşmalardan hangileri doğu sınırını belirlemiştir?¶I. Gümrü¶II. Kars¶III. Mudanya","I ve II","Yalnız I","I ve III","I, II ve III","Mudanya, Doğu Trakya ile ilgili bir ateşkestir."],
+["Tarih",2,"Aşağıdakilerden hangileri Osmanlı'nın duraklama dönemi gelişmelerindendir?¶I. Preveze Deniz Zaferi¶II. Celali İsyanları¶III. Zitvatorok Antlaşması","II ve III","Yalnız II","I ve II","I ve III","Preveze (1538) yükselme dönemindedir."],
+["Tarih",2,"Aşağıdakilerden hangisi 1923 yılında gerçekleşmiştir?¶I. Mudanya Ateşkesi¶II. Saltanatın kaldırılması¶III. Cumhuriyetin ilanı","Yalnız III","Yalnız II","I ve II","I, II ve III","Mudanya ve saltanatın kaldırılması 1922'dedir."],
+["Tarih",2,"Aşağıdakilerden hangisi XVI. yüzyılda yaşanmıştır?¶I. Preveze Deniz Savaşı¶II. İkinci Viyana Kuşatması¶III. Karlofça Antlaşması","Yalnız I","Yalnız II","II ve III","I ve III","Viyana kuşatması 1683, Karlofça 1699'dur."],
+["Tarih",3,"Atatürk dönemi dış politikasında aşağıdakilerden hangileri yer alır?¶I. Montrö Boğazlar Sözleşmesi¶II. Hatay'ın anavatana katılması¶III. Balkan Antantı","I, II ve III","I ve II","I ve III","II ve III","Sırasıyla 1936, 1939 ve 1934 tarihlidir."],
+["Tarih",3,"Osmanlı'da ordu alanında yapılan yeniliklerle ilgili hangileri doğrudur?¶I. Nizam-ı Cedid ordusu kurulmuştur.¶II. Yeniçeri Ocağı kaldırılmıştır.¶III. Mecelle ordunun düzenlenmesi için hazırlanmıştır.","I ve II","Yalnız I","I ve III","II ve III","Mecelle hukuk alanında bir çalışmadır."],
+["Tarih",2,"Anadolu Selçuklu Devleti ile ilgili hangileri doğrudur?¶I. Başkenti uzun süre Konya olmuştur.¶II. Kösedağ Savaşı'ndan sonra Moğollara bağlanmıştır.¶III. Dandanakan Savaşı ile kurulmuştur.","I ve II","Yalnız II","I ve III","II ve III","Dandanakan Büyük Selçuklu'nun kuruluşunu sağladı."],
+["Tarih",2,"Asya Hun Devleti ile ilgili hangileri doğrudur?¶I. Mete Han döneminde güçlenmiştir.¶II. Orduyu onlu sisteme göre düzenlemiştir.¶III. Orhun Yazıtları'nı dikmiştir.","I ve II","Yalnız I","I ve III","I, II ve III","Orhun Yazıtları Göktürklere aittir."],
+["Tarih",2,"Karahanlılar ile ilgili hangileri doğrudur?¶I. İslamiyet'i kabul eden ilk Türk devletidir.¶II. Dandanakan Savaşı ile kurulmuştur.¶III. Kutadgu Bilig bu dönemde yazılmıştır.","I ve III","Yalnız I","I ve II","II ve III","Dandanakan Büyük Selçukluları kurdurdu."],
+["Tarih",2,"Aşağıdakilerden hangileri siyasi alanda yapılan inkılaplardandır?¶I. Saltanatın kaldırılması¶II. Halifeliğin kaldırılması¶III. Harf Devrimi","I ve II","Yalnız I","I ve III","II ve III","Harf Devrimi kültür alanındadır."],
+["Tarih",2,"Lozan Antlaşması ile ilgili hangileri doğrudur?¶I. Kapitülasyonlar kaldırılmıştır.¶II. Boğazlar sorunu tamamen çözülmüştür.¶III. Batı sınırı belirlenmiştir.","I ve III","Yalnız I","I ve II","II ve III","Boğazlar sorunu 1936'da Montrö ile çözüldü."],
+["Tarih",2,"Osmanlı Devleti'nin kuruluş dönemiyle ilgili hangileri doğrudur?¶I. Uç beyliği olarak kurulmuştur.¶II. İlk başkent Bursa olmuştur.¶III. Kanun-i Esasi ilan edilmiştir.","I ve II","Yalnız I","I ve III","II ve III","Kanun-i Esasi 1876'da ilan edildi."],
+["Tarih",2,"Sevr Antlaşması ile ilgili hangileri doğrudur?¶I. TBMM tarafından imzalanmıştır.¶II. Osmanlı Devleti ile İtilaf Devletleri arasında imzalanmıştır.¶III. Türkiye Cumhuriyeti tarafından uygulanmıştır.","Yalnız II","Yalnız I","I ve II","II ve III","Sevr'i TBMM kabul etmedi, uygulanmadı."],
+["Tarih",3,"Balkan Savaşları'nın sonuçlarından hangileri söylenebilir?¶I. Osmanlı Rumeli'deki topraklarının büyük bölümünü kaybetmiştir.¶II. Türk milliyetçiliği güçlenmiştir.¶III. İtalya Trablusgarp'ı işgal etmiştir.","I ve II","Yalnız I","I ve III","I, II ve III","Trablusgarp 1911'de, savaştan önce işgal edildi."],
+["Tarih",2,"Aşağıdaki savaş–karşı taraf eşleştirmelerinden hangisi yanlıştır?","Kösedağ – Bizans","Dandanakan – Gazneliler","Malazgirt – Bizans","Çaldıran – Safeviler","Kösedağ'da Anadolu Selçukluları Moğollara yenildi."],
+["Tarih",3,"Aşağıdakilerden hangisi Haçlı Seferleri'nin sonuçlarından biri değildir?","Osmanlı Devleti'nin kurulması","Ticaret yollarının önem kazanması","Doğu-Batı etkileşiminin artması","Feodalitenin zayıflaması","Osmanlı'nın kuruluşu (1299) Haçlı Seferleri'nin sonucu değildir."],
+["Tarih",2,"Aşağıdaki olayları eskiden yeniye sıralayınız.¶I. Malazgirt Savaşı¶II. Kosova Savaşı¶III. Çaldıran Savaşı","I - II - III","II - I - III","I - III - II","III - II - I","1071, 1389, 1514."],
+["Tarih",2,"Aşağıdaki olayları eskiden yeniye sıralayınız.¶I. Sakarya Meydan Muharebesi¶II. Büyük Taarruz¶III. I. İnönü Savaşı","III - I - II","I - II - III","I - III - II","II - III - I","1921 Ocak, 1921 Ağustos-Eylül, 1922."],
+["Tarih",3,"Aşağıdaki olayları eskiden yeniye sıralayınız.¶I. Tanzimat Fermanı¶II. Kanun-i Esasi¶III. Sened-i İttifak","III - I - II","I - III - II","II - III - I","I - II - III","1808, 1839, 1876."],
+["Tarih",3,"Aşağıdaki olayları eskiden yeniye sıralayınız.¶I. Misak-ı Millî¶II. TBMM'nin açılması¶III. Erzurum Kongresi","III - I - II","I - III - II","III - II - I","II - I - III","Erzurum 1919, Misak-ı Millî Ocak 1920, TBMM Nisan 1920."],
+["Tarih",3,"Aşağıdaki olayları eskiden yeniye sıralayınız.¶I. Medeni Kanun¶II. Harf Devrimi¶III. Soyadı Kanunu","I - II - III","II - I - III","III - II - I","I - III - II","1926, 1928, 1934."],
+["Coğrafya",1,"Aşağıdaki ürünlerden hangileri Karadeniz kıyılarında yetiştirilir?¶I. Çay¶II. Fındık¶III. Pamuk","I ve II","Yalnız I","I ve III","I, II ve III","Pamuk Ege, Çukurova ve Güneydoğu'da yetişir."],
+["Coğrafya",1,"Turunçgil yetiştiriciliği en fazla hangi bölgemizde yapılır?","Akdeniz","Karadeniz","İç Anadolu","Doğu Anadolu","Mersin, Adana ve Antalya öne çıkar."],
+["Coğrafya",2,"Aşağıdaki ürün–yetiştiği yer eşleştirmelerinden hangisi yanlıştır?","Antep fıstığı – Karadeniz","Haşhaş – Afyonkarahisar","Muz – Anamur","Kayısı – Malatya","Antep fıstığı Güneydoğu Anadolu'da yetişir."],
+["Coğrafya",2,"Aşağıdakilerden hangileri bor madeninin çıkarıldığı yerlerdendir?¶I. Eskişehir (Kırka)¶II. Balıkesir (Bigadiç)¶III. Zonguldak","I ve II","Yalnız I","I ve III","I, II ve III","Zonguldak taşkömürü ile bilinir."],
+["Coğrafya",1,"Taşkömürü Türkiye'de hangi ilde çıkarılmaktadır?","Zonguldak","Batman","Muğla","Eskişehir"],
+["Coğrafya",1,"Türkiye'de petrol çıkarılan illerden biri hangisidir?","Batman","Zonguldak","Eskişehir","Muğla"],
+["Coğrafya",2,"Krom madeni bakımından zengin olan il hangisidir?","Muğla","Zonguldak","Batman","Konya"],
+["Coğrafya",2,"Aşağıdakilerden hangileri linyit çıkarılan yerlerdendir?¶I. Batman¶II. Soma¶III. Elbistan","II ve III","Yalnız II","I ve II","I ve III","Batman petrol ile bilinir."],
+["Coğrafya",1,"Ankara keçisinden elde edilen tiftik hangi ilimizle özdeşleşmiştir?","Ankara","Aydın","Bursa","Muş"],
+["Coğrafya",2,"İpek böcekçiliği ile ünlü olan il hangisidir?","Bursa","Rize","Erzurum","Mardin"],
+["Coğrafya",2,"Aşağıdakilerden hangileri meraya dayalı hayvancılığın yaygın olduğu bölgelerdir?¶I. Marmara¶II. Doğu Anadolu¶III. İç Anadolu","II ve III","Yalnız II","I ve II","I ve III","Marmara'da ahır hayvancılığı yaygındır."],
+["Coğrafya",3,"Türkiye'de pirinç tarımı en çok hangi bölgede yapılır?","Marmara","Ege","İç Anadolu","Doğu Anadolu","Edirne (Meriç Ovası) çevresinde yoğundur."],
+["Coğrafya",2,"GAP kapsamında hangi akarsular üzerinde barajlar yapılmıştır?","Fırat ve Dicle","Kızılırmak ve Sakarya","Gediz ve Menderes","Seyhan ve Ceyhan"],
+["Coğrafya",2,"Harran Ovası'nda GAP ile sulamanın artmasıyla hangi ürünün üretimi artmıştır?","Pamuk","Çay","Fındık","Muz"],
+["Coğrafya",3,"Aşağıdakilerden hangileri tektonik kökenli göllerdendir?¶I. Nemrut Gölü¶II. Hazar Gölü¶III. Eğirdir Gölü","II ve III","Yalnız II","I ve II","I ve III","Nemrut Gölü krater gölüdür."],
+["Coğrafya",3,"Aşağıdaki göllerden hangisi volkanik set gölüdür?","Van Gölü","Eğirdir Gölü","Beyşehir Gölü","Tuz Gölü","Nemrut Dağı'nın lavları suyun önünü kapattı."],
+["Coğrafya",3,"Türkiye'nin yüzölçümü bakımından en büyük baraj gölü hangisidir?","Atatürk Barajı Gölü","Keban Barajı Gölü","Karakaya Barajı Gölü","Hirfanlı Barajı Gölü"],
+["Coğrafya",2,"Muz yetiştiriciliği Türkiye'de en çok hangi kıyılarda yapılır?","Akdeniz kıyıları","Karadeniz kıyıları","Ege kıyıları","Marmara kıyıları","Anamur ve Alanya çevresi öne çıkar."],
+["Coğrafya",1,"Kayısı yetiştiriciliği ile ünlü olan il hangisidir?","Malatya","Aydın","Rize","Edirne"],
+["Coğrafya",2,"Marmara Bölgesi'nde sanayinin yoğunlaşmasında hangi etkenler rol oynamıştır?¶I. Geniş pazar¶II. Ulaşım kolaylığı¶III. Limanların varlığı","I, II ve III","I ve II","I ve III","II ve III","Üçü de etkilidir."],
+["Coğrafya",3,"Çukurova'da tarımın gelişmesine hangileri katkı sağlamıştır?¶I. Akarsularla taşınan alüvyon¶II. Akdeniz iklimi¶III. Sulama olanakları","I, II ve III","I ve II","I ve III","II ve III","Üçü de etkilidir."],
+["Coğrafya",2,"Şeker pancarı Türkiye'de en çok hangi bölgede üretilir?","İç Anadolu","Akdeniz","Doğu Anadolu","Güneydoğu Anadolu"],
+["Coğrafya",1,"Türkiye'de tuz üretimi en çok hangi gölden yapılır?","Tuz Gölü","Van Gölü","Burdur Gölü","Beyşehir Gölü"],
+["Coğrafya",3,"Aşağıdakilerden hangileri akarsuların biriktirmesiyle oluşan (alüvyal) ovalardandır?¶I. Çukurova¶II. Bafra¶III. Konya","I ve II","Yalnız I","I ve III","II ve III","Konya Ovası eski göl tabanıdır."],
+].map((a,i)=>({id:i,ders:a[0],z:a[1],soru:a[2],opt:a.slice(3,7),acik:a[7],m:a[8]}));
+
+const TUR=40, SEV=["Kolay","Orta","Zor"];
+// Ders ağırlıkları (Tarih en ağır) ve her derse özel renk
+const AGIRLIK={"Tarih":40,"Coğrafya":25,"Vatandaşlık":15,"Türkçe":10,"Matematik":10};
+const DC={"Türkçe":"#e0526a","Matematik":"#1e88c7","Tarih":"#c9791a","Coğrafya":"#1f9d55","Vatandaşlık":"#8b5cf6"};
+const DERS=[...new Set(Q.map(q=>q.ders))];
+const $=document.getElementById("app");
+let G;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+const TR=[[28.0,41.98],[27.3,42.0],[26.6,41.85],[26.33,41.71],[26.6,41.35],[26.38,40.92],[26.05,40.77],[26.6,40.5],[26.18,40.05],[26.05,39.5],[26.7,39.3],[26.9,38.9],[26.8,38.4],[26.3,38.3],[27.25,37.85],[27.4,37.0],[27.2,36.7],[28.3,36.85],[29.1,36.6],[29.6,36.2],[30.15,36.3],[30.7,36.85],[32.0,36.5],[32.8,36.05],[34.6,36.8],[35.35,36.55],[36.17,36.58],[36.0,35.85],[36.55,36.25],[37.1,36.7],[38.0,36.85],[38.95,36.7],[40.0,36.83],[41.2,37.1],[42.35,37.3],[42.85,37.2],[43.6,37.25],[44.2,37.55],[44.8,37.15],[44.3,38.3],[44.2,39.35],[44.5,39.7],[44.8,39.7],[44.0,40.05],[43.5,40.55],[43.45,41.1],[42.7,41.55],[41.55,41.52],[40.5,41.0],[39.7,41.0],[38.4,40.9],[37.9,41.0],[36.3,41.3],[35.2,42.0],[33.7,41.98],[32.3,41.7],[31.8,41.45],[31.15,41.1],[30.2,41.15],[29.6,41.2],[29.1,41.25],[28.5,41.55],[28.1,41.6]];
+const px=(lo,la)=>[Math.round((lo-25.5)*36.9),Math.round((42.3-la)*47.5)];
+function harita(m){
+  const pts=TR.map(t=>px(t[0],t[1]).join(",")).join(" "),[x,y]=px(m[0],m[1]),[mx,my]=px(28.2,40.7);
+  return `<svg viewBox="0 0 720 320" style="width:100%;margin-top:10px"><polygon points="${pts}" fill="var(--bg)" stroke="var(--ac)" stroke-width="2" stroke-linejoin="round"/><ellipse cx="${mx}" cy="${my}" rx="55" ry="13" fill="var(--ac)" opacity=".35"/><circle cx="${x}" cy="${y}" r="9" fill="var(--no)" stroke="#fff" stroke-width="2"/></svg>`;
+}
+function kapak(){
+  const ic=[["🏛️","Tarih"],["🗺️","Coğrafya"],["⚖️","Vatandaşlık"],["📖","Türkçe"],["➗","Matematik"]];
+  const pts=TR.map(t=>px(t[0],t[1]).join(",")).join(" ");
+  const f="font-family:system-ui,-apple-system,sans-serif";
+  return `<svg viewBox="0 0 720 300" style="width:100%;border-radius:14px;display:block"><defs><linearGradient id="kg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eaf7ff"/><stop offset="1" stop-color="#7cc4ee"/></linearGradient></defs><rect width="720" height="300" fill="url(#kg)"/><polygon points="${pts}" transform="translate(0,-4)" fill="#1e88c7" opacity=".3"/><text x="360" y="118" text-anchor="middle" style="${f};font-size:72px;font-weight:800;letter-spacing:2px" fill="#0b3550">KPSS ARENA</text><text x="360" y="158" text-anchor="middle" style="${f};font-size:21px" fill="#0b3550">Bilgi düellosu: karışık sorular, öncüllüler, iki kişilik yarış</text>${ic.map((x,i)=>`<circle cx="${120+i*120}" cy="232" r="36" fill="${DC[x[1]]}" stroke="#fff" stroke-width="4"/><text x="${120+i*120}" y="245" text-anchor="middle" style="font-size:36px">${x[0]}</text>`).join("")}</svg>`;
+}
+let SEC="Karışık";
+function menu(){
+  SCR="menu";
+  const ops=["Karışık",...DERS].map(d=>`<option ${d===SEC?"selected":""}>${d}</option>`).join("");
+  $.innerHTML=`<button class="bk" id="bk">← Giriş</button><div class="card"><h1>Oyunu Kur</h1>
+  <p>Ders seç ya da karışık oyna. Karışıkta en sık Tarih, sonra Coğrafya gelir. Oyun 40 turdur; geçmiş turlara dönüp sorulara tekrar bakabilirsin. Sorular kolaydan zora gider; doğru cevap 10, 20 veya 30 puan kazandırır ve soru otomatik geçilir; yanlışta açıklamayı görürsün.</p>
+  <select id="ds">${ops}</select>
+  <button class="main" id="a">Tek kişi</button>
+  <button class="main" id="b">İki kişi (yarışma)</button>
+  <p class="exp">İki kişide oyuncular aynı cihazda sırayla oynar; her turda ikisi de aynı zorlukta soru alır.</p></div>`;
+  document.getElementById("bk").onclick=()=>history.back();ds.onchange=()=>SEC=ds.value;a.onclick=()=>start(1);b.onclick=()=>start(2);
+}
+
+function start(n){
+  history.pushState({s:"oyun"},"");SCR="oyun";
+  const hv=Q.filter(q=>SEC==="Karışık"||q.ders===SEC);
+  G={n,t:0,used:new Set(),hist:[],v:null,fin:false,havuz:hv,tur:Math.min(TUR,hv.length),p:Array.from({length:n},(_,i)=>({ad:n>1?"Oyuncu "+(i+1):"Sen",puan:0,stat:Object.fromEntries(DERS.map(d=>[d,{d:0,y:0}]))}))};
+  next();
+}
+
+// Karışık soru: seviyeye en yakın kalan sorular içinden, oyuncunun yanlış yaptığı derse ağırlık vererek seç
+function pick(pi,L){
+  let free=G.havuz.filter(q=>!G.used.has(q.id));
+  if(!free.length)return null;
+  const m=Math.min(...free.map(q=>Math.abs(q.z-L)));
+  free=free.filter(q=>Math.abs(q.z-L)===m);
+  const ds=[...new Set(free.map(q=>q.ders))],w=ds.map(d=>AGIRLIK[d]*(1+0.3*G.p[pi].stat[d].y));
+  let r=Math.random()*w.reduce((a,b)=>a+b,0),ders=ds[0];
+  for(let i=0;i<ds.length;i++){r-=w[i];if(r<=0){ders=ds[i];break}}
+  const c=free.filter(q=>q.ders===ders);
+  return c[Math.floor(Math.random()*c.length)];
+}
+
+const ORD=["Yalnız I","Yalnız II","Yalnız III","I ve II","I ve III","II ve III","I, II ve III"];
+function next(){
+  if(SCR!=="oyun")return;
+  G.v=null;
+  if(G.t>=G.tur)return end();
+  G.pi=G.t%G.n;G.L=1+Math.floor(G.t*3/G.tur);
+  const q=pick(G.pi,G.L);if(!q)return end();
+  G.used.add(q.id);G.ci=G.t;
+  const o=q.opt.map((t,i)=>({t,ok:i===0}));
+  G.hist[G.t]={q,pi:G.pi,L:G.L,sec:null,ok:null,sirali:o.every(x=>ORD.includes(x.t))?o.sort((a,b)=>ORD.indexOf(a.t)-ORD.indexOf(b.t)):shuffle(o)};
+  draw();
+}
+
+function draw(){
+  const vi=G.v==null?G.ci:G.v,E=G.hist[vi],q=E.q,ans=E.sec!==null,ro=vi!==G.ci,cp=G.hist[G.ci].pi;
+  let h=`<div class="top"><button class="bk" id="bk">←</button>${G.p.map((p,i)=>`<span class="${i===cp?"on":""}">${p.ad}: ${p.puan}</span>`).join("")}</div><div class="pg">`;
+  for(let i=0;i<G.tur;i++){const e=G.hist[i];h+=`<button class="pc${e&&e.sec!==null?(e.ok?" ok":" no"):""}${i===vi?" cur":""}" data-i="${i}" ${i>G.ci?"disabled":""}>${i+1}</button>`}
+  h+=`</div><div class="card" style="border-left:5px solid ${DC[q.ders]}"><span class="tag">Tur ${vi+1}/${G.tur}</span><span class="tag">${SEV[E.L-1]}</span><span class="tag" style="color:${DC[q.ders]};border-color:${DC[q.ders]}">${q.ders}</span>${G.n>1?`<span class="tag">${G.p[E.pi].ad}</span>`:""}<div><b>${q.soru.replace(/¶/g,"<br>")}</b></div>${q.m?harita(q.m):""}`;
+  E.sirali.forEach((o,k)=>{
+    let c="opt";
+    if(ans){if(o.ok)c+=" ok";else if(k===E.sec)c+=" no"}
+    h+=`<button class="${c}" data-k="${k}" ${ans||ro?"disabled":""}>${o.t}</button>`;
+  });
+  if(ans&&(ro||!E.ok||G.fin))h+=`<div class="exp">${q.acik||"Doğru cevap yeşil işaretli."}</div>`;
+  if(G.fin)h+=`<button class="main" id="n">Sonuçlara dön</button>`;
+  else if(ro)h+=`<button class="main" id="n">Şu anki tura dön</button>`;
+  else if(ans&&!E.ok)h+=`<button class="main" id="n">${G.t>=G.tur?"Sonuçları gör":(G.n>1?"Sıra: "+G.p[G.t%G.n].ad:"Sonraki tur")}</button>`;
+  $.innerHTML=h+"</div>";
+  document.getElementById("bk").onclick=()=>history.back();
+  $.querySelectorAll(".opt").forEach(b=>b.onclick=()=>cevap(+b.dataset.k));
+  $.querySelectorAll(".pc").forEach(b=>b.onclick=()=>{const i=+b.dataset.i;G.v=i===G.ci?null:i;draw()});
+  const n=document.getElementById("n");if(n)n.onclick=G.fin?end:ro?()=>{G.v=null;draw()}:next;
+  const pg=$.querySelector(".pg"),c=$.querySelector(".pc.cur");if(c)pg.scrollLeft=c.offsetLeft-pg.clientWidth/2;
+}
+
+function cevap(k){
+  const E=G.hist[G.ci];
+  if(E.sec!==null||(G.v!=null&&G.v!==G.ci))return;
+  const p=G.p[E.pi],ok=E.sirali[k].ok;
+  E.sec=k;E.ok=ok;G.t++;
+  if(ok){p.puan+=10*E.L;p.stat[E.q.ders].d++}else p.stat[E.q.ders].y++;
+  draw();if(ok)setTimeout(next,700);
+}
+
+function end(){
+  SCR="sonuc";G.fin=false;
+  const mx=Math.max(...G.p.map(p=>p.puan)),w=G.p.filter(p=>p.puan===mx);
+  const baslik=G.n===1?"Oyun bitti":(w.length>1?"🤝 Berabere!":"🏆 "+w[0].ad+" kazandı!");
+  const rows=DERS.map(d=>`<tr><td>${d}</td>${G.p.map(p=>`<td>${p.stat[d].d} ✓ ${p.stat[d].y} ✗</td>`).join("")}</tr>`).join("");
+  $.innerHTML=`<div class="card"><h1>${baslik}</h1>
+  ${G.p.map(p=>`<div>${p.ad}: <b>${p.puan}</b> puan</div>`).join("")}
+  <table><tr><th>Ders</th>${G.p.map(p=>`<th>${p.ad}</th>`).join("")}</tr>${rows}</table>
+  <button class="main" id="v">Soruları incele</button>
+  <button class="main" id="r">Ana menü</button></div>`;
+  v.onclick=()=>{G.fin=true;G.v=null;G.ci=G.hist.length-1;draw()};
+  r.onclick=()=>history.back();
+}
+
+let SCR="giris";
+function giris(){
+  SCR="giris";
+  $.innerHTML=`${kapak()}<div class="card"><p style="margin-top:0">KPSS'ye hazırlananlar için ÖSYM tarzı, karışık ve yarışmalı bilgi oyunu.</p>
+  <div class="st"><div><b>${Q.length}</b>soru</div><div><b>${TUR}</b>tur</div><div><b>1-2</b>oyuncu</div></div>
+  <button class="main" id="go">Başla</button></div>`;
+  document.getElementById("go").onclick=()=>{history.pushState({s:"menu"},"");menu()};
+}
+// Telefonun/tarayıcının geri tuşu: oyun → menü → giriş
+addEventListener("popstate",()=>{
+  if(SCR==="oyun"&&G&&G.t>0){
+    if(confirm("Oyundan çıkılsın mı? Mevcut puanların silinir."))menu();
+    else history.pushState({s:"oyun"},"");
+  }else if(SCR==="giris")return;
+  else if(SCR==="menu")giris();
+  else menu();
+});
+history.replaceState({s:"giris"},"");
+giris();
+</script>
+</body>
+</html>
